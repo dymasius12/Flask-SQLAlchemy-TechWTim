@@ -49,7 +49,9 @@ class Video(Resource):
     @marshal_with(resource_fields) 
     def get(self, video_id):
         # abort_if_video_id_doesnt_exist(video_id)
-        result = VideoModel.query.get(id=video_id)
+
+        # Filter all the video by id and get the first entry that is filtered by.
+        result = VideoModel.query.filter_by(id=video_id).first()
         # return videos[video_id]
         return result
 
@@ -60,6 +62,10 @@ class Video(Resource):
         # videos[video_id] = args
         # return videos[video_id], 201
         args = video_put_args.parse_args()
+        result = VideoModel.query.filter_by(id=video_id).first()
+        if result:
+            abort(409, message="video id taken.. ")
+
         video = VideoModel(id=video_id, name=args['name'], views=args['views'], likes=args['likes'])
         db.session.add(video)
         db.session.commit()
